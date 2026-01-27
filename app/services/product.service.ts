@@ -2,6 +2,7 @@ import { CreateProductDTO, UpdateProductDTO } from "@/app/DTO/product.dto";
 import {
   createProductRepo,
   deleteProductRepo,
+  findAllProductsRepo,
   findProductByIdRepo,
   updateProductRepo,
 } from "@/app/repositories/productRepository";
@@ -15,7 +16,23 @@ function validateId(id: number) {
     throw new Error("ID tidak valid");
   }
 }
+export async function getProducts() {
+  try {
+    const products = await findAllProductsRepo();
+    return {
+      ok: true,
+      data: products,
+    };
+  } catch (error) {
+    console.error("PRODUCT SERVICE ERROR:", error.message);
 
+    return {
+      ok: false,
+      data: [],
+      errorCode: "DB_DOWN",
+    };
+  }
+}
 export async function createProductService(dto: CreateProductDTO) {
   if (!dto.nama?.trim()) {
     throw new Error("Nama produk wajib diisi");
