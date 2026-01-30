@@ -1,12 +1,12 @@
 import { ProductDTO } from "../domain/products/productTypes";
 import { prisma } from "../lib/prisma";
 import { InterfaceProductRepository } from "./InterfaceProductRepository";
+
 export class ProductRepository implements InterfaceProductRepository {
   async findAll(): Promise<ProductDTO[]> {
     return await prisma.product.findMany();
   }
   async findById(id: string) {
-    // Pastikan prisma diimport
     return await prisma.product.findUnique({
       where: { id },
     });
