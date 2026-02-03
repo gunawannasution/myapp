@@ -75,6 +75,7 @@ Berikut adalah urutan langkah demi langkah secara profesional:
 Jangan sentuh database dulu. Tentukan dulu "apa saja yang mau kita lakukan".
 Buat file: domain/product/product.types.ts (Definisikan objeknya).
 Buat file: domain/product/product.repository.ts (Tentukan kontrak interface-nya).
+
 2. Buat Infrastructure (Koneksi Database)
 Setelah tahu kontraknya, buat implementasi nyatanya.
 Edit: prisma/schema.prisma (Buat tabelnya).

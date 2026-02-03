@@ -12,9 +12,26 @@ generator client {
 datasource db {
   provider = "mysql"
 }
+
+model Category {
+  id       String    @id @default(uuid())
+  name     String
+  // Menambahkan list produk yang terkait
+  products Product[]
+}
 model Product {
-  id    String @id @default(uuid())
-  name  String
-  price Float
-  stock Int
+  id          String   @id @default(uuid())
+  name        String
+  price       Float
+  stock       Int
+  images      ProductImage[] // Relasi ke tabel gambar
+  categoryId  String
+  category    Category @relation(fields: [categoryId], references: [id])
+}
+
+model ProductImage {
+  id        String  @id @default(uuid())
+  url       String  // Simpan path atau URL gambar
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 }
