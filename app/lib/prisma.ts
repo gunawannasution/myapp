@@ -11,7 +11,10 @@ const prismaClientSingleton = () => {
     database: process.env.DATABASE_NAME,
     connectionLimit: 10, // Naikkan sedikit ke 10 agar lebih aman
   });
-  return new PrismaClient({ adapter });
+  return new PrismaClient({
+    adapter,
+    log: ["query", "error", "warn"], // Tambahkan ini untuk melihat apa yang terjadi di terminal
+  });
 };
 
 // Deklarasi global agar instance tersimpan di memori Node.js saat dev mode

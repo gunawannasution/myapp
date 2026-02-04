@@ -7,7 +7,12 @@ import { InterfaceCategoryRepo } from "./InterfaceCategoryRepo";
 
 export class CategoryRepo implements InterfaceCategoryRepo {
   async findAll(): Promise<CategoriesDTO[]> {
-    return await prisma.category.findMany();
+    try {
+      return await prisma.category.findMany();
+    } catch (error) {
+      console.error("Database Down", error);
+      return [];
+    }
   }
 
   // Koreksi 1: Tambahkan objek 'where' dan gunakan 'string' (kecil)

@@ -11,9 +11,14 @@ export class ProductRepository implements InterfaceProductRepository {
   // }
 
   async findAll(): Promise<ProductDTO[]> {
-    return await prisma.product.findMany({
-      include: { images: true }, // WAJIB: supaya data gambar ikut ketarik
-    });
+    try {
+      return await prisma.product.findMany({
+        include: { images: true }, // WAJIB: supaya data gambar ikut ketarik
+      });
+    } catch (error) {
+      console.error("Database Down", error);
+      return [];
+    }
   }
 
   async findById(id: string): Promise<ProductDTO | null> {
