@@ -1,6 +1,7 @@
 import Input from "@/app/components/ui/Input";
 import { CategoriesDTO } from "@/app/domain/categories/categoryTypes";
 import Link from "next/link";
+import SubmitButton from "../admin/categories/create/SubmitButton";
 
 interface CategoryFormProps {
   title: string;
@@ -8,17 +9,29 @@ interface CategoryFormProps {
   initialData?: CategoriesDTO; // Jika ada data, otomatis mode Edit
 }
 
+// app/admin/categories/_components/CategoryForm.tsx
+
 export default function CategoryForm({
   title,
   action,
   initialData,
 }: CategoryFormProps) {
   return (
-    <div className="max-w-md mx-auto mt-10 p-8 bg-white rounded-2xl shadow-sm border border-gray-100">
-      <h1 className="text-2xl font-bold text-gray-800 mb-6">{title}</h1>
+    // Penjelasan perubahan:
+    // 1. w-full: Agar di layar HP lebarnya memenuhi layar.
+    // 2. max-w-lg: Memperlebar sedikit dari md ke lg (sekitar 512px) agar form tidak terlalu sempit.
+    // 3. mx-auto: Menjaga posisi tetap di tengah.
+    <div className="w-full max-w-lg mx-auto mt-6 lg:mt-10 p-6 lg:p-10 bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100">
+      <div className="mb-8">
+        <h1 className="text-2xl font-black text-gray-900 tracking-tight">
+          {title}
+        </h1>
+        <p className="text-sm text-gray-400 mt-1">
+          Pastikan nama kategori belum pernah digunakan.
+        </p>
+      </div>
 
-      <form action={action} className="space-y-6">
-        {/* Hidden ID hanya muncul jika mode Edit */}
+      <form action={action} className="space-y-7">
         {initialData?.id && (
           <input type="hidden" name="id" value={initialData.id} />
         )}
@@ -31,19 +44,14 @@ export default function CategoryForm({
           required
         />
 
-        <div className="flex justify-end gap-4 pt-2">
+        <div className="flex items-center justify-end gap-6 pt-4 border-t border-gray-50">
           <Link
-            href="/categories"
-            className="text-sm font-medium text-gray-400 hover:text-gray-600 transition-colors py-2"
+            href="/admin/categories"
+            className="text-sm font-bold text-gray-400 hover:text-blue-600 transition-all"
           >
             Batal
           </Link>
-          <button
-            type="submit"
-            className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-2.5 rounded-xl text-sm font-bold shadow-lg shadow-indigo-100 transition-all active:scale-95"
-          >
-            {initialData ? "Perbarui" : "Simpan"} Kategori
-          </button>
+          <SubmitButton isEdit={!!initialData} />
         </div>
       </form>
     </div>

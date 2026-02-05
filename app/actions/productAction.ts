@@ -32,8 +32,8 @@ export async function addProductAction(formData: FormData) {
 
   // Redirect ditaruh di luar try-catch karena redirect() melempar error internal Next.js
   if (isSuccess) {
-    revalidatePath("/products");
-    redirect("/products");
+    revalidatePath("/admin/products");
+    redirect("/admin/products");
   }
 }
 
@@ -61,8 +61,8 @@ export async function updateProductAction(formData: FormData) {
   }
 
   if (isSuccess) {
-    revalidatePath("/products");
-    redirect("/products");
+    revalidatePath("/admin/products");
+    redirect("/admin/products");
   }
 }
 
@@ -79,7 +79,7 @@ export async function deleteProductAction(id: string) {
   }
 
   if (isSuccess) {
-    revalidatePath("/products");
-    redirect("/products");
+    revalidatePath("/admin/products");
+    redirect("/admin/products");
   }
 }

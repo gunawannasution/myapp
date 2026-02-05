@@ -2,10 +2,10 @@
 import DataTable from "@/app/components/DataTable";
 import Image from "next/image"; // Gunakan Next Image agar optimal
 import Link from "next/link";
-import { deleteProductAction } from "../actions/productAction";
-import DeleteButton from "../components/ui/DeleteButton";
-import { ProductRepository } from "../repositories/productRepository";
-import { ProductService } from "../services/productServices";
+import { deleteProductAction } from "../../actions/productAction";
+import DeleteButton from "../../components/ui/DeleteButton";
+import { ProductRepository } from "../../repositories/productRepository";
+import { ProductService } from "../../services/productServices";
 
 export default async function ProductListPage() {
   const productService = new ProductService(new ProductRepository());
@@ -18,7 +18,7 @@ export default async function ProductListPage() {
           Products
         </h1>
         <Link
-          href="/products/create"
+          href="/admin/products/create"
           className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-bold transition-all shadow-lg shadow-blue-100"
         >
           + New Product
@@ -60,7 +60,7 @@ export default async function ProductListPage() {
 
           return (
             <div className="flex items-center gap-4">
-              <Link href={`/products/${product.id}/edit`} className="...">
+              <Link href={`/admin/products/${product.id}/edit`} className="...">
                 Edit
               </Link>
 

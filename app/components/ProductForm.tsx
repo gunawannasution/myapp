@@ -6,6 +6,8 @@ import Textarea from "@/app/components/ui/Textarea";
 import { CategoryDTO, ProductDTO } from "@/app/domain/products/productTypes";
 import Link from "next/link";
 import { ChangeEvent, useState } from "react";
+import { useFormStatus } from "react-dom";
+import SubmitButton from "../admin/products/SubmitButton";
 import ImagePreview from "./ui/ImagePreview";
 
 interface ProductFormProps {
@@ -44,6 +46,9 @@ export default function ProductForm({
     );
   };
 
+  function submitButton() {
+    const { pending } = useFormStatus(); //mengambil status otomatis dari form action
+  }
   return (
     <div className="max-w-md mx-auto mt-10 p-8 bg-white rounded-2xl shadow-sm border border-gray-100">
       <h1 className="text-2xl font-bold text-gray-800 mb-6">{title}</h1>
@@ -145,12 +150,8 @@ export default function ProductForm({
           >
             Batal
           </Link>
-          <button
-            type="submit"
-            className="bg-blue-600 text-white px-6 py-2.5 rounded-xl text-sm font-bold shadow-lg shadow-blue-100 active:scale-95 transition-all hover:bg-blue-700"
-          >
-            {initialData ? "Update Produk" : "Simpan Produk"}
-          </button>
+          {/* GUNAKAN KOMPONEN INI */}
+          <SubmitButton isEdit={!!initialData} />
         </div>
       </form>
     </div>

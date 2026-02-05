@@ -37,3 +37,13 @@ export async function loginAction(
 
   redirect("/admin/dashboard");
 }
+
+export async function logoutAction() {
+  const cookieStore = await cookies();
+
+  // Hapus cookie dengan nama yang sama saat login
+  cookieStore.delete("admin_token");
+
+  // Redirect ke halaman login setelah logout
+  redirect("/login");
+}
