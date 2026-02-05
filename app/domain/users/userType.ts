@@ -1,11 +1,11 @@
 export type UserId = string;
 export type UserRole = "ADMIN" | "USER";
 
-export type User {
+export type User = {
   id: UserId;
   email: string;
   password?: string;
-  name: string |null;
+  name: string | null;
   role: UserRole;
   createdAt: Date;
-}
+};

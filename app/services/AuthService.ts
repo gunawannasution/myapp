@@ -1,5 +1,5 @@
 import bcrypt from "bcryptjs";
-import { jwt } from "zod";
+import { jwt } from "zod/mini";
 import { LoginRequestDTO, LoginResponseDTO } from "../domain/users/UserDTO";
 import { InterfaceUserRepository } from "../repositories/IUserRepository";
 

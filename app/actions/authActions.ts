@@ -1,6 +1,8 @@
 "use server";
 
-import { ActionReponse } from "../domain/users/UserDTO";
+import { cookies } from "next/headers"; // TAMBAHKAN INI
+import { redirect } from "next/navigation"; // TAMBAHKAN INI
+import { ActionReponse, LoginRequestDTO } from "../domain/users/UserDTO";
 import { UserRepository } from "../repositories/UserRepository";
 import { AuthServices } from "../services/AuthService";
 
@@ -18,12 +20,17 @@ export async function loginAction(
     const authService = new AuthServices(userRepository);
     const result = await authService.login(payload);
 
-    (await cookies()).set("admin_token", result.token, {
+    // Gunakan await cookies() untuk Next.js 15
+    const cookieStore = await cookies();
+    cookieStore.set("admin_token", result.token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       maxAge: 60 * 60 * 24,
       path: "/",
     });
+
+    // Redirect harus di luar block try-catch atau dilempar ulang karena
+    // redirect Next.js bekerja dengan melempar error khusus
   } catch (error: any) {
     return { success: false, message: error.message };
   }

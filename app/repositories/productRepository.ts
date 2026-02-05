@@ -6,14 +6,11 @@ import { prisma } from "../lib/prisma";
 import { InterfaceProductRepository } from "./InterfaceProductRepository";
 
 export class ProductRepository implements InterfaceProductRepository {
-  // async findAll(): Promise<ProductDTO[]> {
-  //   return await prisma.product.findMany();
-  // }
-
+  // Mengambil semua produk beserta gambarnya
   async findAll(): Promise<ProductDTO[]> {
     try {
       return await prisma.product.findMany({
-        include: { images: true }, // WAJIB: supaya data gambar ikut ketarik
+        include: { images: true }, // Mengambil data relasi gambar
       });
     } catch (error) {
       console.error("Database Down", error);
@@ -21,16 +18,15 @@ export class ProductRepository implements InterfaceProductRepository {
     }
   }
 
+  // Mencari produk berdasarkan ID (digunakan untuk detail & edit)
   async findById(id: string): Promise<ProductDTO | null> {
-    // Tambahkan type di sini
     return await prisma.product.findUnique({
       where: { id },
+      include: { images: true }, // include gambar supaya preview muncul saat edit
     });
   }
 
-  // async create(data: CreateProductInput): Promise<ProductDTO> {
-  //   return await prisma.product.create({ data });
-  // }
+  // Membuat produk baru dan simpan URL gambar ke tabel Image
   async create(data: CreateProductInput): Promise<ProductDTO> {
     return await prisma.product.create({
       data: {
@@ -39,7 +35,7 @@ export class ProductRepository implements InterfaceProductRepository {
         stock: data.stock,
         categoryId: data.categoryId,
         images: {
-          // Membuat record di tabel ProductImage secara otomatis
+          // Mapping array string URL menjadi objek create Prisma
           create: data.imageUrls?.map((url) => ({ url })) || [],
         },
       },
@@ -47,6 +43,7 @@ export class ProductRepository implements InterfaceProductRepository {
     });
   }
 
+  // Update data produk, hapus gambar terpilih, dan tambah gambar baru
   async update(id: string, data: any) {
     return await prisma.product.update({
       where: { id },
@@ -56,10 +53,12 @@ export class ProductRepository implements InterfaceProductRepository {
         stock: data.stock,
         categoryId: data.categoryId,
         images: {
-          // Hapus record gambar yang diminta
+          // Menghapus gambar lama berdasarkan ID yang dikirim dari UI
           deleteMany:
-            data.imagesToDelete?.map((imgId: string) => ({ id: imgId })) || [],
-          // Tambah record gambar baru
+            data.imagesToDelete && data.imagesToDelete.length > 0
+              ? { id: { in: data.imagesToDelete } }
+              : undefined,
+          // Menambah gambar baru
           create: data.imageUrls?.map((url: string) => ({ url })) || [],
         },
       },
@@ -67,7 +66,20 @@ export class ProductRepository implements InterfaceProductRepository {
     });
   }
 
+  // Menghapus produk (tabel Image akan ikut terhapus karena Cascade di Schema)
   async delete(id: string): Promise<void> {
     await prisma.product.delete({ where: { id } });
   }
-}
+
+  /**
+   * FUNGSI BARU: Ambil satu gambar spesifik
+   * Sekarang sudah berada di dalam class ProductRepository
+   * Digunakan Service untuk cari URL file sebelum dihapus dari disk
+   */
+  async findImageById(id: string) {
+    return await prisma.image.findUnique({
+      where: { id },
+      select: { url: true },
+    });
+  }
+} // <--- Kurung kurawal penutup class harus di sini

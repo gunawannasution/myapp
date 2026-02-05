@@ -4,8 +4,8 @@ import { InterfaceUserRepository } from "./IUserRepository";
 
 export class UserRepository implements InterfaceUserRepository {
   async findByEmail(email: string): Promise<User | null> {
-    return await prisma.user.findUnique({
-      where: { email } as User | null,
-    });
+    return (await prisma.user.findUnique({
+      where: { email }, // Prisma sudah tahu tipenya jika schema benar
+    })) as User | null; // Casting di akhir jika diperlukan
   }
 }

@@ -8,6 +8,7 @@ export type ProductImageDTO = {
 export type ProductDTO = {
   id: string;
   name: string;
+  description:string?
   price: number;
   stock: number;
   categoryId: string;
