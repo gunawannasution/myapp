@@ -1,5 +1,3 @@
-// app/domain/products/productTypes.ts
-
 export type ProductImageDTO = {
   id: string;
   url: string;
@@ -8,26 +6,29 @@ export type ProductImageDTO = {
 export type ProductDTO = {
   id: string;
   name: string;
-  description:string?
+  description?: string | null;
   price: number;
   stock: number;
   categoryId: string;
-  images: ProductImageDTO[]; // Relasi gambar dari database
+  images: ProductImageDTO[];
 };
 
 /**
- * Input untuk membuat produk baru
- * Kita membuang 'id' dan 'images' (DTO), lalu menggantinya dengan 'imageFiles'
+ * Input create = field yang benar-benar dikirim dari UI
  */
-export type CreateProductInput = Omit<ProductDTO, "id" | "images"> & {
-  imageFiles?: File[]; // Input mentah dari Form (Multipart)
-  imageUrls?: string[]; // Hasil proses upload di Service (Path string)
+export type CreateProductInput = {
+  name: string;
+  description?: string | null;
+  price: number;
+  stock: number;
+  categoryId: string;
+  imageFiles?: File[];
+  imageUrls?: string[];
 };
 
 /**
- * Input untuk memperbarui produk
- * Menggunakan Partial agar tidak semua field wajib diisi saat update
+ * Input update = Partial dari create + imagesToDelete
  */
 export type UpdateProductInput = Partial<CreateProductInput> & {
-  imagesToDelete?: string[]; // Array ID gambar yang ingin dihapus dari database & disk
+  imagesToDelete?: string[];
 };

@@ -1,5 +1,5 @@
-import Navbar from "./_components/Navbar";
-import ProductCard from "./_components/ProductCard";
+import Navbar from "./(public)/_components/Navbar";
+import ProductCard from "./(public)/_components/ProductCard";
 import { ProductRepository } from "./repositories/productRepository";
 
 export default async function HomePage() {

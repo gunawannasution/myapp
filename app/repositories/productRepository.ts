@@ -3,6 +3,7 @@ import {
   ProductDTO,
 } from "../domain/products/productTypes";
 import { prisma } from "../lib/prisma";
+import { UpdateProductInput } from "../types/typeProduct";
 import { InterfaceProductRepository } from "./InterfaceProductRepository";
 
 export class ProductRepository implements InterfaceProductRepository {
@@ -44,7 +45,7 @@ export class ProductRepository implements InterfaceProductRepository {
   }
 
   // Update data produk, hapus gambar terpilih, dan tambah gambar baru
-  async update(id: string, data: any) {
+  async update(id: string, data: UpdateProductInput): Promise<ProductDTO> {
     return await prisma.product.update({
       where: { id },
       data: {
@@ -52,14 +53,12 @@ export class ProductRepository implements InterfaceProductRepository {
         price: data.price,
         stock: data.stock,
         categoryId: data.categoryId,
+        description: data.description ?? undefined,
         images: {
-          // Menghapus gambar lama berdasarkan ID yang dikirim dari UI
-          deleteMany:
-            data.imagesToDelete && data.imagesToDelete.length > 0
-              ? { id: { in: data.imagesToDelete } }
-              : undefined,
-          // Menambah gambar baru
-          create: data.imageUrls?.map((url: string) => ({ url })) || [],
+          deleteMany: data.imagesToDelete?.length
+            ? { id: { in: data.imagesToDelete } }
+            : undefined,
+          create: data.imageUrls?.map((url) => ({ url })) || [],
         },
       },
       include: { images: true },
@@ -76,10 +75,13 @@ export class ProductRepository implements InterfaceProductRepository {
    * Sekarang sudah berada di dalam class ProductRepository
    * Digunakan Service untuk cari URL file sebelum dihapus dari disk
    */
-  async findImageById(id: string) {
+  async findImageById(id: string): Promise<{ id: string; url: string } | null> {
     return await prisma.image.findUnique({
       where: { id },
-      select: { url: true },
+      select: {
+        id: true,
+        url: true,
+      },
     });
   }
-} // <--- Kurung kurawal penutup class harus di sini
+}

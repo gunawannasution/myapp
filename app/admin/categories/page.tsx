@@ -1,3 +1,5 @@
+import DeleteButton from "@/app/components/ui/DeleteButton";
+import { CategoriesDTO } from "@/app/domain/categories/categoryTypes";
 import Link from "next/link";
 import { deleteCategoryAction } from "../../actions/CategoryAction";
 import DataTable from "../../components/DataTable";
@@ -21,11 +23,10 @@ export default async function CategoryPage() {
         </Link>
       </header>
 
-      <DataTable
+      <DataTable<CategoriesDTO>
         data={categories}
         columns={[{ header: "Nama Category", accessor: "name" }]}
-        renderActions={(category) => {
-          // Binding ID ke Action (Cara Paling Profesional)
+        renderActions={(category: CategoriesDTO) => {
           const deleteWithId = deleteCategoryAction.bind(null, category.id);
 
           return (
@@ -37,9 +38,7 @@ export default async function CategoryPage() {
                 Edit
               </Link>
 
-              <form action={deleteWithId}>
-                <button type="submit">Hapus</button>
-              </form>
+              <DeleteButton action={deleteWithId} />
             </div>
           );
         }}

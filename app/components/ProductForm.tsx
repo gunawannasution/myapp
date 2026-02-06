@@ -3,17 +3,18 @@
 
 import Input from "@/app/components/ui/Input";
 import Textarea from "@/app/components/ui/Textarea";
-import { CategoryDTO, ProductDTO } from "@/app/domain/products/productTypes";
+import { ProductDTO } from "@/app/domain/products/productTypes";
 import Link from "next/link";
 import { ChangeEvent, useState } from "react";
 import { useFormStatus } from "react-dom";
 import SubmitButton from "../admin/products/SubmitButton";
+import { CategoriesDTO } from "../domain/categories/categoryTypes";
 import ImagePreview from "./ui/ImagePreview";
 
 interface ProductFormProps {
   title: string;
   action: (formData: FormData) => void;
-  categories: CategoryDTO[];
+  categories: CategoriesDTO[];
   initialData?: ProductDTO;
 }
 
@@ -69,7 +70,7 @@ export default function ProductForm({
         <Textarea
           label="Deskripsi Produk"
           name="description"
-          defaultValue={initialData?.description}
+          defaultValue={initialData?.description ?? ""}
           placeholder="Isi deskripsi produk"
           rows={3}
         />
