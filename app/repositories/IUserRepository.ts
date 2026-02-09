@@ -1,5 +1,5 @@
-import { User } from "../domain/users/userType";
+import { UserAuthDTO } from "../domain/users/UserDTO";
 
 export interface InterfaceUserRepository {
-  findByEmail(email: string): Promise<User | null>;
+  findByEmail(email: string): Promise<UserAuthDTO | null>;
 }

@@ -1,34 +1,30 @@
-// middleware.ts (Letakkan di root folder, di luar folder app)
-import type { NextRequest } from "next/server";
-import { NextResponse } from "next/server"; // <--- WAJIB ADA INI
+import { JWT_SECRET_EDGE } from "@/app/lib/auth";
+import { jwtVerify } from "jose";
+import { NextRequest, NextResponse } from "next/server";
 
-export function middleware(request: NextRequest) {
-  // 1. Ambil token dari cookie (namanya sesuaikan dengan loginAction tadi)
-  const token = request.cookies.get("admin_token")?.value;
+export async function middleware(req: NextRequest) {
+  const token = req.cookies.get("admin_token")?.value;
+  const { pathname } = req.nextUrl;
 
-  // 2. Ambil path yang sedang diakses
-  const { pathname } = request.nextUrl;
+  if (pathname.startsWith("/admin")) {
+    if (!token) {
+      return NextResponse.redirect(new URL("/login", req.url));
+    }
 
-  // 3. LOGIKA PROTEKSI
-  // Jika mencoba akses folder /admin tapi tidak punya token
-  if (pathname.startsWith("/admin") && !token) {
-    // Tendang ke halaman login
-    return NextResponse.redirect(new URL("/login", request.url));
-  }
+    try {
+      const { payload } = await jwtVerify(token, JWT_SECRET_EDGE);
 
-  // Jika sudah punya token tapi malah mau akses halaman login lagi
-  if (pathname === "/login" && token) {
-    // Lempar langsung ke dashboard
-    return NextResponse.redirect(new URL("/admin/dashboard", request.url));
+      if (payload.role !== "ADMIN") {
+        return NextResponse.redirect(new URL("/login", req.url));
+      }
+    } catch {
+      return NextResponse.redirect(new URL("/login", req.url));
+    }
   }
 
   return NextResponse.next();
 }
 
-// 4. CONFIG: Tentukan path mana saja yang akan diproses middleware ini
 export const config = {
-  matcher: [
-    "/admin/:path*", // Proteksi semua yang diawali /admin
-    "/login", // Cek juga saat di halaman login
-  ],
+  matcher: ["/admin/:path*", "/login"],
 };

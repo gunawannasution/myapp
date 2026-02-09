@@ -13,7 +13,7 @@ export default defineConfig({
     url: process.env["DATABASE_URL"],
     // url: process.env.DATABASE_URL || "mysql://root:@localhost:3306/db_myapp",
   },
-  client: {
-    engineType: "binary", // ✅ ini kuncinya
-  },
+  // client: {
+  //   // engineType: "binary", // ✅ ini kuncinya
+  // },
 });

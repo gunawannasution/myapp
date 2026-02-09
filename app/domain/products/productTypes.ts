@@ -1,34 +1,41 @@
-export type ProductImageDTO = {
-  id: string;
-  url: string;
-};
-
-export type ProductDTO = {
-  id: string;
+/**
+ * CREATE → dari Service ke Repository
+ * File SUDAH DI-UPLOAD
+ */
+export interface CreateProductInput {
   name: string;
-  description?: string | null;
+  description: string | null;
   price: number;
   stock: number;
   categoryId: string;
-  images: ProductImageDTO[];
-};
+  imageUrls: string[];
+}
 
 /**
- * Input create = field yang benar-benar dikirim dari UI
+ * UPDATE → dari Service ke Repository
  */
-export type CreateProductInput = {
-  name: string;
+export interface UpdateProductInput {
+  name?: string;
   description?: string | null;
-  price: number;
-  stock: number;
-  categoryId: string;
-  imageFiles?: File[];
+  price?: number;
+  stock?: number;
+  categoryId?: string;
   imageUrls?: string[];
-};
+  imagesToDelete?: string[];
+}
 
 /**
- * Input update = Partial dari create + imagesToDelete
+ * DATA UNTUK UI
  */
-export type UpdateProductInput = Partial<CreateProductInput> & {
-  imagesToDelete?: string[];
-};
+export interface ProductDTO {
+  id: string;
+  name: string;
+  description: string | null;
+  price: number;
+  stock: number;
+  categoryId: string;
+  images: {
+    id: string;
+    url: string;
+  }[];
+}

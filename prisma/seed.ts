@@ -1,5 +1,5 @@
 // prisma/seed.ts
-import { prisma } from "@/app/lib/prisma.ts";
+import { prisma } from "@/app/lib/prisma";
 import bcrypt from "bcryptjs";
 
 async function main() {

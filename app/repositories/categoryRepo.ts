@@ -1,45 +1,28 @@
-import {
-  CategoriesDTO,
-  CreateCategoryInput,
-} from "../domain/categories/categoryTypes";
+import { CreateCategoryInput } from "../domain/categories/categoryTypes";
 import { prisma } from "../lib/prisma";
 import { InterfaceCategoryRepo } from "./InterfaceCategoryRepo";
 
 export class CategoryRepo implements InterfaceCategoryRepo {
-  async findAll(): Promise<CategoriesDTO[]> {
-    try {
-      return await prisma.category.findMany();
-    } catch (error) {
-      console.error("Database Down", error);
-      return [];
-    }
+  async findAll() {
+    return prisma.category.findMany();
   }
 
-  // Koreksi 1: Tambahkan objek 'where' dan gunakan 'string' (kecil)
-  async findById(id: string): Promise<CategoriesDTO | null> {
-    return await prisma.category.findUnique({
-      where: { id },
-    });
+  async findById(id: string) {
+    return prisma.category.findUnique({ where: { id } });
   }
 
-  async create(data: CreateCategoryInput): Promise<CategoriesDTO> {
-    return await prisma.category.create({ data });
+  async create(data: CreateCategoryInput) {
+    return prisma.category.create({ data });
   }
 
-  async update(
-    id: string,
-    data: Partial<CreateCategoryInput>,
-  ): Promise<CategoriesDTO> {
-    return await prisma.category.update({
+  async update(id: string, data: CreateCategoryInput) {
+    return prisma.category.update({
       where: { id },
       data,
     });
   }
 
-  // Koreksi 2: Gunakan 'string' (kecil) dan pastikan argumen 'where' benar
-  async delete(id: string): Promise<void> {
-    await prisma.category.delete({
-      where: { id },
-    });
+  async delete(id: string) {
+    await prisma.category.delete({ where: { id } });
   }
 }

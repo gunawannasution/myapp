@@ -1,21 +1,9 @@
-import {
-  CategoriesDTO,
-  CreateCategoryInput,
-} from "../domain/categories/categoryTypes";
+import { CreateCategoryInput } from "../domain/categories/categoryTypes";
 
 export interface InterfaceCategoryRepo {
-  findAll(): Promise<CategoriesDTO[]>;
-
-  // Gunakan 'string' huruf kecil
-  findById(id: string): Promise<CategoriesDTO | null>;
-
-  create(data: CreateCategoryInput): Promise<CategoriesDTO>;
-
-  update(
-    id: string,
-    data: Partial<CreateCategoryInput>,
-  ): Promise<CategoriesDTO>;
-
-  // Gunakan 'string' huruf kecil
+  findAll(): Promise<any[]>;
+  findById(id: string): Promise<any | null>;
+  create(data: CreateCategoryInput): Promise<any>;
+  update(id: string, data: CreateCategoryInput): Promise<any>;
   delete(id: string): Promise<void>;
 }

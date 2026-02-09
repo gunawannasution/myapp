@@ -1,6 +1,7 @@
 import bcrypt from "bcryptjs";
-import { jwt } from "zod/mini";
+import jwt from "jsonwebtoken";
 import { LoginRequestDTO, LoginResponseDTO } from "../domain/users/UserDTO";
+import { JWT_SECRET_NODE } from "../lib/auth";
 import { InterfaceUserRepository } from "../repositories/IUserRepository";
 
 export class AuthServices {
@@ -12,17 +13,24 @@ export class AuthServices {
     if (!user || user.role !== "ADMIN") {
       throw new Error("Kredensial Tidak Valid");
     }
-    const isMatch = await bcrypt.compare(payload.pass, user.password);
-    if (!isMatch) throw new Error("Password Salah");
 
-    const token = jwt.toString(
+    const isMatch = await bcrypt.compare(payload.pass, user.password);
+    if (!isMatch) {
+      throw new Error("Password Salah");
+    }
+
+    const token = jwt.sign(
       { id: user.id, role: user.role },
-      process.env.JWT_SECRET || "secret_gunawan_app",
-      { expiresIn: "id" },
+      JWT_SECRET_NODE, // ✅ STRING
+      { expiresIn: "1d" },
     );
 
     return {
-      user: { name: user.name, email: user.email, role: user.role },
+      user: {
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      },
       token,
     };
   }
