@@ -1,6 +1,7 @@
 import Navbar from "@/app/(public)/_components/Navbar";
 import ProductGallery from "@/app/(public)/_components/ProductGallery"; // Import komponen baru
 import { ProductRepository } from "@/app/repositories/productRepository";
+import { ProductService } from "@/app/services/productServices";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -10,7 +11,7 @@ export default async function ProductDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const repo = new ProductRepository();
+  const repo = new ProductService(ProductRepository());
   const product = await repo.findById(id);
 
   if (!product) notFound();

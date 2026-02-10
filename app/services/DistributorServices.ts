@@ -1,7 +1,6 @@
 import {
   CreateDistributorInput,
   DistributorDTO,
-  UpdateDistributorInput,
 } from "../domain/distributor/distributorTypes";
 import { interfaceDistributor } from "../repositories/InterfaceDistributor";
 
@@ -16,16 +15,17 @@ export class DistributorServices {
     return this.repo.findById(id);
   }
 
-  async create(input: CreateDistributorInput): Promise<DistributorDTO> {
-    return this.repo.create(input);
+  async create(form: { name: string }): Promise<DistributorDTO> {
+    const payload: CreateDistributorInput = {
+      name: form.name,
+    };
+    return this.repo.create(payload);
   }
 
-  async update(
-    id: String,
-    input: UpdateDistributorInput,
-  ): Promise<DistributorDTO> {
-    return this.repo.update(id, input);
+  async update(id: string, form: { name: string }): Promise<DistributorDTO> {
+    return this.repo.update(id, { name: form.name });
   }
+
   async remove(id: string): Promise<void> {
     return this.repo.delete(id);
   }

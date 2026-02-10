@@ -15,6 +15,7 @@ export default function Sidebar({
     { name: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
     { name: "Products", href: "/admin/products", icon: Package },
     { name: "Categories", href: "/admin/categories", icon: Tags },
+    { name: "Distributors", href: "/admin/distributors", icon: Tags },
     { name: "Users", href: "/admin/users", icon: Users },
   ];
 

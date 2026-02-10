@@ -1,6 +1,6 @@
 // app/products/page.tsx
 import DataTable from "@/app/components/DataTable";
-import { DistibutorRepository } from "@/app/repositories/DistributorRepository";
+import { DistributorRepository } from "@/app/repositories/DistributorRepository";
 import { DistributorServices } from "@/app/services/DistributorServices";
 import Link from "next/link";
 import { deleteProductAction } from "../../actions/productAction";
@@ -8,7 +8,7 @@ import DeleteButton from "../../components/ui/DeleteButton";
 
 export default async function DistributorListPage() {
   const distributorService = new DistributorServices(
-    new DistibutorRepository(),
+    new DistributorRepository(),
   );
   const distributor = await distributorService.getAll();
 
@@ -56,12 +56,15 @@ export default async function DistributorListPage() {
           // },
           // { header: "Stok", accessor: "stock" },
         ]}
-        renderActions={(product) => {
-          const deleteWithId = deleteProductAction.bind(null, product.id);
+        renderActions={(distributor) => {
+          const deleteWithId = deleteProductAction.bind(null, distributor.id);
 
           return (
             <div className="flex items-center gap-4">
-              <Link href={`/admin/products/${product.id}/edit`} className="...">
+              <Link
+                href={`/admin/distributors/${distributor.id}/edit`}
+                className="..."
+              >
                 Edit
               </Link>
 

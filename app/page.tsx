@@ -1,10 +1,11 @@
 import Navbar from "./(public)/_components/Navbar";
 import ProductCard from "./(public)/_components/ProductCard";
 import { ProductRepository } from "./repositories/productRepository";
+import { ProductService } from "./services/productServices";
 
 export default async function HomePage() {
-  const repo = new ProductRepository();
-  const products = await repo.findAll();
+  const repo = new ProductService(new ProductRepository());
+  const products = await repo.getAll();
 
   return (
     <div className="min-h-screen bg-white">

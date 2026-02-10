@@ -6,7 +6,6 @@ import Textarea from "@/app/components/ui/Textarea";
 import { ProductDTO } from "@/app/domain/products/productTypes";
 import Link from "next/link";
 import { ChangeEvent, useState } from "react";
-import { useFormStatus } from "react-dom";
 import SubmitButton from "../admin/products/SubmitButton";
 import { CategoriesDTO } from "../domain/categories/categoryTypes";
 import ImagePreview from "./ui/ImagePreview";
@@ -47,9 +46,6 @@ export default function ProductForm({
     );
   };
 
-  function submitButton() {
-    const { pending } = useFormStatus(); //mengambil status otomatis dari form action
-  }
   return (
     <div className="max-w-md mx-auto mt-10 p-8 bg-white rounded-2xl shadow-sm border border-gray-100">
       <h1 className="text-2xl font-bold text-gray-800 mb-6">{title}</h1>

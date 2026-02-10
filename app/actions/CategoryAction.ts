@@ -15,7 +15,7 @@ export async function addCategoryAction(formData: FormData) {
   try {
     await categoryService.create({ name });
   } catch (e) {
-    return { error: "Gagal menambah kategori" };
+    return { error: "Gagal menambah kategori", e };
   }
 
   revalidatePath("/admin/categories");
@@ -31,7 +31,7 @@ export async function updateCategoryAction(formData: FormData) {
   try {
     await categoryService.update(id, { name });
   } catch (e) {
-    return { error: "Gagal memperbarui kategori" };
+    return { error: "Gagal memperbarui kategori", e };
   }
 
   revalidatePath("/admin/categories");
@@ -41,24 +41,22 @@ export async function updateCategoryAction(formData: FormData) {
 export async function deleteCategoryAction(id: string) {
   if (!id) return { error: "ID Kosong" };
 
-  let isSuccess = false;
-
   try {
     await categoryService.remove(id);
-    isSuccess = true;
     revalidatePath("/admin/categories");
-  } catch (e: any) {
-    // Menangkap error foreign key dari Prisma (P2003)
-    if (e.code === "P2003") {
+    redirect("/admin/categories");
+  } catch (error: unknown) {
+    if (
+      typeof error === "object" &&
+      error !== null &&
+      "code" in error &&
+      error.code === "P2003"
+    ) {
       return {
         error: "Gagal hapus! Kategori ini masih digunakan oleh produk lain.",
       };
     }
-    return { error: "Gagal menghapus kategori" };
-  }
 
-  // Redirect ditaruh di luar catch agar tidak dianggap sebagai error oleh Next.js
-  if (isSuccess) {
-    redirect("/admin/categories");
+    return { error: "Gagal menghapus kategori" };
   }
 }

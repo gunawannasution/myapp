@@ -10,11 +10,21 @@ export class ProductService {
   constructor(private repo: InterfaceProductRepository) {}
 
   async getAll(): Promise<ProductDTO[]> {
-    return this.repo.findAll();
+    try {
+      return await this.repo.findAll();
+    } catch (error) {
+      console.error("[ProductService.getAll] DB ERROR:", error);
+      return []; // fallback agar UI tetap hidup
+    }
   }
 
   async getById(id: string): Promise<ProductDTO | null> {
-    return this.repo.findById(id);
+    try {
+      return this.repo.findById(id);
+    } catch (error) {
+      console.error("[ProductService.getById] DB ERROR", error);
+      return [];
+    }
   }
 
   async create(form: {
@@ -25,20 +35,25 @@ export class ProductService {
     categoryId: string;
     imageFiles: File[];
   }): Promise<ProductDTO> {
-    if (form.price <= 0) throw new Error("Harga tidak valid");
+    try {
+      if (form.price <= 0) throw new Error("Harga tidak valid");
 
-    const imageUrls = await this.uploadImages(form.imageFiles);
+      const imageUrls = await this.uploadImages(form.imageFiles);
 
-    const payload: CreateProductInput = {
-      name: form.name,
-      description: form.description,
-      price: form.price,
-      stock: form.stock,
-      categoryId: form.categoryId,
-      imageUrls,
-    };
+      const payload: CreateProductInput = {
+        name: form.name,
+        description: form.description,
+        price: form.price,
+        stock: form.stock,
+        categoryId: form.categoryId,
+        imageUrls,
+      };
 
-    return this.repo.create(payload);
+      return this.repo.create(payload);
+    } catch (error) {
+      console.error("[ProductService.create]", error);
+      throw new Error("Gagal membuat produk");
+    }
   }
 
   async update(
@@ -53,34 +68,44 @@ export class ProductService {
       imagesToDelete?: string[];
     },
   ): Promise<ProductDTO> {
-    const imageUrls = form.imageFiles
-      ? await this.uploadImages(form.imageFiles)
-      : undefined;
+    try {
+      const imageUrls = form.imageFiles
+        ? await this.uploadImages(form.imageFiles)
+        : undefined;
 
-    if (form.imagesToDelete?.length) {
-      for (const imgId of form.imagesToDelete) {
-        const img = await this.repo.findImageById(imgId);
-        if (img) {
-          await unlink(path.join(process.cwd(), "public", img.url)).catch(
-            () => null,
-          );
+      if (form.imagesToDelete?.length) {
+        for (const imgId of form.imagesToDelete) {
+          const img = await this.repo.findImageById(imgId);
+          if (img) {
+            await unlink(path.join(process.cwd(), "public", img.url)).catch(
+              () => null,
+            );
+          }
         }
       }
-    }
 
-    return this.repo.update(id, {
-      name: form.name,
-      description: form.description,
-      price: form.price,
-      stock: form.stock,
-      categoryId: form.categoryId,
-      imageUrls,
-      imagesToDelete: form.imagesToDelete,
-    });
+      return this.repo.update(id, {
+        name: form.name,
+        description: form.description,
+        price: form.price,
+        stock: form.stock,
+        categoryId: form.categoryId,
+        imageUrls,
+        imagesToDelete: form.imagesToDelete,
+      });
+    } catch (error) {
+      throw new Error("Gagal update produk");
+      console.error("[ProductService.update]", error);
+    }
   }
 
   async remove(id: string): Promise<void> {
-    return this.repo.delete(id);
+    try {
+      await this.repo.delete(id);
+    } catch (error) {
+      console.error("[ProductService.remove]", error);
+      throw new Error("Gagal menghapus produk");
+    }
   }
 
   private async uploadImages(files: File[]): Promise<string[]> {
