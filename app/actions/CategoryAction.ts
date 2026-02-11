@@ -5,21 +5,28 @@ import { redirect } from "next/navigation";
 import { CategoryRepo } from "../repositories/categoryRepo";
 import { CategoryServices } from "../services/categoryServices";
 
-const categoryRepo = new CategoryRepo();
-const categoryService = new CategoryServices(categoryRepo);
+const categoryService = new CategoryServices(new CategoryRepo());
 
-export async function addCategoryAction(formData: FormData) {
+type ActionResult = {
+  success: boolean;
+  error?: string;
+};
+
+export async function addCategoryAction(
+  formData: FormData,
+): Promise<ActionResult> {
   const name = formData.get("name")?.toString();
   if (!name) return { error: "Nama wajib diisi" };
 
   try {
     await categoryService.create({ name });
-  } catch (e) {
-    return { error: "Gagal menambah kategori", e };
-  }
 
-  revalidatePath("/admin/categories");
-  redirect("/admin/categories");
+    revalidatePath("/admin/categories");
+    redirect("/admin/categories");
+  } catch (error) {
+    console.error("[createDistributorAction]", error);
+    return { success: false, error: "Gagal menyimpan distributor" };
+  }
 }
 
 export async function updateCategoryAction(formData: FormData) {

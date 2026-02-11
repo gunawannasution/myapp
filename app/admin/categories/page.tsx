@@ -1,15 +1,26 @@
+// app/admin/categories/page.tsx
+export const dynamic = "force-dynamic";
+
+import DataTable from "@/app/components/DataTable";
 import DeleteButton from "@/app/components/ui/DeleteButton";
 import { CategoriesDTO } from "@/app/domain/categories/categoryTypes";
 import Link from "next/link";
 import { deleteCategoryAction } from "../../actions/CategoryAction";
-import DataTable from "../../components/DataTable";
 import { CategoryRepo } from "../../repositories/categoryRepo";
 import { CategoryServices } from "../../services/categoryServices";
 
 export default async function CategoryPage() {
-  // Inisialisasi Service sesuai alur DDD
   const categoryServices = new CategoryServices(new CategoryRepo());
-  const categories = await categoryServices.getAll();
+
+  let categories: CategoriesDTO[] = [];
+  let dbError = false;
+
+  try {
+    categories = await categoryServices.getAll();
+  } catch (error) {
+    console.error("[CategoryPage] DB ERROR:", error);
+    dbError = true;
+  }
 
   return (
     <section className="p-6 max-w-5xl mx-auto">
@@ -23,26 +34,34 @@ export default async function CategoryPage() {
         </Link>
       </header>
 
-      <DataTable<CategoriesDTO>
-        data={categories}
-        columns={[{ header: "Nama Category", accessor: "name" }]}
-        renderActions={(category: CategoriesDTO) => {
-          const deleteWithId = deleteCategoryAction.bind(null, category.id);
+      {dbError ? (
+        <div className="p-5 border border-red-200 bg-red-50 rounded-lg text-red-700">
+          <h2 className="font-semibold mb-1">Layanan tidak tersedia</h2>
+          <p className="text-sm">
+            Data kategori tidak dapat dimuat. Silakan coba beberapa saat lagi.
+          </p>
+        </div>
+      ) : (
+        <DataTable<CategoriesDTO>
+          data={categories}
+          columns={[{ header: "Nama Category", accessor: "name" }]}
+          renderActions={(category) => {
+            const deleteWithId = deleteCategoryAction.bind(null, category.id);
 
-          return (
-            <div className="flex gap-3">
-              <Link
-                href={`/admin/categories/${category.id}/edit`}
-                className="text-blue-600 hover:text-blue-800 font-medium text-sm"
-              >
-                Edit
-              </Link>
-
-              <DeleteButton action={deleteWithId} />
-            </div>
-          );
-        }}
-      />
+            return (
+              <div className="flex gap-3">
+                <Link
+                  href={`/admin/categories/${category.id}/edit`}
+                  className="text-blue-600 hover:text-blue-800 font-medium text-sm"
+                >
+                  Edit
+                </Link>
+                <DeleteButton action={deleteWithId} />
+              </div>
+            );
+          }}
+        />
+      )}
     </section>
   );
 }

@@ -7,47 +7,64 @@ import { DistributorServices } from "../services/DistributorServices";
 
 const service = new DistributorServices(new DistributorRepository());
 
-export async function createDistributorAction(
-  formData: FormData,
-): Promise<void> {
-  try {
-    await service.create({
-      name: formData.get("name") as string,
-    });
+type ActionResult = {
+  success: boolean;
+  error?: string;
+};
 
-    revalidatePath("/admin/distributors");
-    redirect("/admin/distributors");
-  } catch (error) {
-    console.error("[createDistributorAction]", error);
-    throw new Error("Gagal menyimpan distributor");
+export async function createDistributorAction(
+  prevState: ActionResult,
+  formData: FormData,
+): Promise<ActionResult> {
+  const name = formData.get("name")?.toString();
+
+  if (!name) {
+    return { success: false, error: "Nama Distributor wajib diisi" };
   }
+
+  await service.create({ name });
+
+  revalidatePath("/admin/distributors");
+  redirect("/admin/distributors");
 }
 
 export async function updateDistributorAction(
   formData: FormData,
-): Promise<void> {
+): Promise<ActionResult> {
+  const id = formData.get("distributorId")?.toString();
+  const name = formData.get("name")?.toString();
+
+  if (!id || !name) {
+    return { success: false, error: "Data Tidak Lengkap" };
+  }
+
   try {
-    await service.update(formData.get("distributorId") as string, {
-      name: formData.get("name") as string,
-    });
+    await service.update(id, { name });
 
     revalidatePath("/admin/distributors");
     redirect("/admin/distributors");
   } catch (error) {
     console.error("[updateDistributorAction]", error);
-    throw new Error("Gagal memperbarui distributor");
+    return { success: false, error: "Gagal memperbarui distributor" };
   }
 }
 
 export async function deleteDistributorAction(
   formData: FormData,
-): Promise<void> {
+): Promise<ActionResult> {
+  const id = formData.get("distributorId")?.toString();
+
+  if (!id) {
+    return { success: false, error: "ID tidak valid" };
+  }
+
   try {
-    await service.delete(formData.get("distributorId") as string);
+    await service.delete(id);
 
     revalidatePath("/admin/distributors");
+    redirect("/admin/distributors");
   } catch (error) {
     console.error("[deleteDistributorAction]", error);
-    throw new Error("Gagal menghapus distributor");
+    return { success: false, error: "Gagal menghapus distributor" };
   }
 }

@@ -2,6 +2,7 @@ import React from "react";
 
 interface Column<T> {
   header: string;
+  // Menggunakan React.ReactNode agar accessor function lebih fleksibel
   accessor: keyof T | ((item: T) => React.ReactNode);
 }
 
@@ -11,7 +12,8 @@ interface DataTableProps<T> {
   renderActions?: (item: T) => React.ReactNode;
 }
 
-export default function DataTable<T extends Record<string, any>>({
+// Menggunakan 'T extends object' untuk menghindari 'any'
+export default function DataTable<T extends object>({
   data = [],
   columns,
   renderActions,
@@ -19,7 +21,7 @@ export default function DataTable<T extends Record<string, any>>({
   return (
     <div className="w-full">
       <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-        <div className="overflow-x-auto custom-scrollbar">
+        <div className="overflow-x-auto">
           <table className="w-full text-left text-sm text-gray-600">
             <thead className="bg-gray-50 text-xs font-semibold uppercase tracking-wider text-gray-500 border-b border-gray-200">
               <tr>
@@ -59,7 +61,7 @@ export default function DataTable<T extends Record<string, any>>({
                           <span className="text-gray-900 font-medium md:font-normal">
                             {typeof col.accessor === "function"
                               ? col.accessor(item)
-                              : item[col.accessor]}
+                              : (item[col.accessor] as React.ReactNode)}
                           </span>
                         </div>
                       </td>

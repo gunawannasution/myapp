@@ -7,9 +7,17 @@ import DeleteButton from "../../components/ui/DeleteButton";
 import { ProductRepository } from "../../repositories/productRepository";
 import { ProductService } from "../../services/productServices";
 
+export const dynamic = "force-dynamic";
+
 export default async function ProductListPage() {
   const productService = new ProductService(new ProductRepository());
-  const products = await productService.getAll();
+
+  let products = [];
+  try {
+    products = await productService.getAll();
+  } catch (e) {
+    console.error("[ProductListPage]", e);
+  }
 
   return (
     <section className="max-w-5xl mx-auto mt-10 p-4">
