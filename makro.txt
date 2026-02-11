@@ -1,0 +1,9 @@
+Sub CopySheet1to60()
+    Dim i As Integer
+    Sheets("17").Activate
+
+    For i = 18 To 30
+        Sheets("17").Copy After:=Sheets(Sheets.Count)
+        ActiveSheet.Name = i
+    Next i
+End Sub
