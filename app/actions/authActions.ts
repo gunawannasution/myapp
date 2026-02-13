@@ -6,40 +6,60 @@ import { ActionReponse, LoginRequestDTO } from "../domain/users/UserDTO";
 import { UserRepository } from "../repositories/UserRepository";
 import { AuthServices } from "../services/AuthService";
 
+const userRepository = new UserRepository();
+const authService = new AuthServices(userRepository);
+
+function sanitizeString(value: FormDataEntryValue | null): string | null {
+  if (!value) return null;
+  const str = value.toString().trim();
+  return str.length > 0 ? str : null;
+}
+
+function buildError(message: string): ActionReponse {
+  return {
+    success: false,
+    message,
+  };
+}
+
 export async function loginAction(
-  prevState: ActionReponse | null,
+  _: ActionReponse | null,
   formData: FormData,
 ): Promise<ActionReponse> {
-  const payload: LoginRequestDTO = {
-    email: formData.get("email") as string,
-    pass: formData.get("password") as string,
-  };
-
   try {
-    const userRepository = new UserRepository();
-    const authService = new AuthServices(userRepository);
+    const email = sanitizeString(formData.get("email"));
+    const password = sanitizeString(formData.get("password"));
+
+    if (!email || !password) {
+      return buildError("Email dan password wajib diisi");
+    }
+
+    const payload: LoginRequestDTO = {
+      email,
+      pass: password,
+    };
 
     const result = await authService.login(payload);
 
+    // WAJIB await untuk kompatibilitas versi
     const cookieStore = await cookies();
+
     cookieStore.set("admin_token", result.token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      maxAge: 60 * 60 * 24, // 1 hari
+      sameSite: "lax",
       path: "/",
+      maxAge: 60 * 60 * 24,
     });
-  } catch (error: any) {
-    return {
-      success: false,
-      message: error.message ?? "Login gagal",
-    };
+  } catch (error: unknown) {
+    console.error("[loginAction]", error);
+    return buildError("Email atau password salah");
   }
 
-  // ⚠️ redirect HARUS di luar try-catch
   redirect("/admin/dashboard");
 }
 
-export async function logoutAction() {
+export async function logoutAction(): Promise<void> {
   const cookieStore = await cookies();
   cookieStore.delete("admin_token");
   redirect("/login");

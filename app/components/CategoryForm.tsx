@@ -1,8 +1,7 @@
 import Input from "@/app/components/ui/Input";
 import { CategoriesDTO } from "@/app/domain/categories/categoryTypes";
 import Link from "next/link";
-import SubmitButton from "../admin/categories/create/SubmitButton";
-
+import SubmitButton from "./ui/SubmitButton";
 interface CategoryFormProps {
   title: string;
   action: (formData: FormData) => void;
@@ -51,7 +50,9 @@ export default function CategoryForm({
           >
             Batal
           </Link>
-          <SubmitButton isEdit={!!initialData} />
+          <SubmitButton
+            label={initialData ? "Update Category" : "Simpan Category"}
+          />
         </div>
       </form>
     </div>

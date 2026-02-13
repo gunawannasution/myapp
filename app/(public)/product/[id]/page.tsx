@@ -11,8 +11,8 @@ export default async function ProductDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const repo = new ProductService(ProductRepository());
-  const product = await repo.findById(id);
+  const repo = new ProductService(new ProductRepository());
+  const product = await repo.getById(id);
 
   if (!product) notFound();
 

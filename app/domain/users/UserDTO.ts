@@ -1,13 +1,14 @@
 /**
- * User dari database untuk kebutuhan AUTH
- * ⚠️ password WAJIB ADA
+ * Data user dari database untuk proses AUTH
+ * ⚠️ Jangan pernah dikirim ke client
  */
 export interface UserAuthDTO {
   id: string;
   name: string;
   email: string;
   password: string;
-  role: "ADMIN" | "USER";
+  role: UserRole;
+  tokenVersion: number;
 }
 
 /**
@@ -15,7 +16,7 @@ export interface UserAuthDTO {
  */
 export interface LoginRequestDTO {
   email: string;
-  pass: string;
+  password: string; // ganti pass → konsisten
 }
 
 /**
@@ -24,14 +25,15 @@ export interface LoginRequestDTO {
  */
 export interface LoginResponseDTO {
   user: {
+    id: string;
     name: string;
     email: string;
-    role: string;
+    role: UserRole;
   };
   token: string;
 }
 
-export interface ActionReponse {
+export interface ActionResponse {
   success: boolean;
   message?: string;
 }
