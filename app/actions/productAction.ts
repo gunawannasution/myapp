@@ -117,11 +117,10 @@ export async function deleteProductAction(id: string): Promise<ActionResult> {
     if (!productId) return buildError("ID produk tidak valid");
 
     await productService.remove(productId);
-
-    revalidatePath("/admin/products");
-    redirect("/admin/products");
   } catch (error) {
     console.error("[deleteProductAction]", error);
     return buildError("Terjadi kesalahan saat menghapus produk");
   }
+  revalidatePath("/admin/products");
+  redirect("/admin/products");
 }

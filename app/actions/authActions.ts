@@ -2,65 +2,60 @@
 
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { ActionReponse, LoginRequestDTO } from "../domain/users/UserDTO";
+import { ActionResponse } from "../domain/users/UserDTO";
+import { checkRateLimit } from "../lib/rateLimiter";
 import { UserRepository } from "../repositories/UserRepository";
-import { AuthServices } from "../services/AuthService";
+import { AuthService } from "../services/AuthService";
 
-const userRepository = new UserRepository();
-const authService = new AuthServices(userRepository);
+const authService = new AuthService(new UserRepository());
 
-function sanitizeString(value: FormDataEntryValue | null): string | null {
+function sanitize(value: FormDataEntryValue | null): string | null {
   if (!value) return null;
-  const str = value.toString().trim();
-  return str.length > 0 ? str : null;
-}
-
-function buildError(message: string): ActionReponse {
-  return {
-    success: false,
-    message,
-  };
+  const trimmed = value.toString().trim();
+  return trimmed.length > 0 ? trimmed : null;
 }
 
 export async function loginAction(
-  _: ActionReponse | null,
+  _: ActionResponse | null,
   formData: FormData,
-): Promise<ActionReponse> {
-  try {
-    const email = sanitizeString(formData.get("email"));
-    const password = sanitizeString(formData.get("password"));
+): Promise<ActionResponse> {
+  const email = sanitize(formData.get("email"));
+  const password = sanitize(formData.get("password"));
 
-    if (!email || !password) {
-      return buildError("Email dan password wajib diisi");
-    }
-
-    const payload: LoginRequestDTO = {
-      email,
-      pass: password,
+  if (!email || !password) {
+    return {
+      success: false,
+      message: "Email dan password wajib diisi",
     };
+  }
 
-    const result = await authService.login(payload);
+  try {
+    checkRateLimit(email);
 
-    // WAJIB await untuk kompatibilitas versi
-    const cookieStore = await cookies();
+    const result = await authService.login({ email, password }, ["ADMIN"]);
+
+    const cookieStore = cookies();
 
     cookieStore.set("admin_token", result.token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
+      sameSite: "strict",
       path: "/",
       maxAge: 60 * 60 * 24,
     });
-  } catch (error: unknown) {
-    console.error("[loginAction]", error);
-    return buildError("Email atau password salah");
+  } catch (error) {
+    return {
+      success: false,
+      message: "Email atau password salah",
+    };
   }
 
+  // ⬇ redirect di luar try/catch
   redirect("/admin/dashboard");
 }
 
 export async function logoutAction(): Promise<void> {
-  const cookieStore = await cookies();
+  const cookieStore = cookies();
   cookieStore.delete("admin_token");
-  redirect("/login");
+  return redirect("/login");
 }

@@ -1,50 +1,44 @@
 import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
-import { LoginRequestDTO, LoginResponseDTO } from "../domain/users/UserDTO";
-import { JWT_SECRET_NODE } from "../lib/auth";
+import {
+  LoginRequestDTO,
+  LoginResponseDTO,
+  UserRole,
+} from "../domain/users/UserDTO";
+import { signToken } from "../lib/jwt";
 import { InterfaceUserRepository } from "../repositories/IUserRepository";
 
-type JwtPayload = {
-  id: string;
-  role: string;
-};
-
-export class AuthServices {
+export class AuthService {
   constructor(private userRepository: InterfaceUserRepository) {}
 
   async login(
     payload: LoginRequestDTO,
-    allowedRoles?: string[],
+    allowedRoles?: UserRole[],
   ): Promise<LoginResponseDTO> {
     const user = await this.userRepository.findByEmail(payload.email);
 
-    // Unified error to prevent user enumeration
-    if (!user) {
+    if (!user || user.deletedAt) {
       throw new Error("Kredensial tidak valid");
     }
 
-    const isMatch = await bcrypt.compare(payload.pass, user.password);
+    const isMatch = await bcrypt.compare(payload.password, user.password);
 
     if (!isMatch) {
       throw new Error("Kredensial tidak valid");
     }
 
-    // Optional role guard
     if (allowedRoles && !allowedRoles.includes(user.role)) {
       throw new Error("Akses ditolak");
     }
 
-    const tokenPayload: JwtPayload = {
-      id: user.id,
+    const token = signToken({
+      sub: user.id,
       role: user.role,
-    };
-
-    const token = jwt.sign(tokenPayload, JWT_SECRET_NODE, {
-      expiresIn: "1d",
+      tokenVersion: user.tokenVersion,
     });
 
     return {
       user: {
+        id: user.id,
         name: user.name,
         email: user.email,
         role: user.role,
@@ -57,15 +51,24 @@ export class AuthServices {
     name: string;
     email: string;
     password: string;
-    role: string;
+    role?: UserRole;
   }) {
-    const hashedPassword = await bcrypt.hash(data.password, 12);
+    const existing = await this.userRepository.findByEmail(data.email);
+    if (existing) {
+      throw new Error("Email sudah digunakan");
+    }
+
+    const hashed = await bcrypt.hash(data.password, 12);
 
     return this.userRepository.create({
       name: data.name,
       email: data.email,
-      password: hashedPassword,
-      role: data.role,
+      password: hashed,
+      role: data.role ?? "USER",
     });
+  }
+
+  async invalidateUserSessions(userId: string) {
+    return this.userRepository.incrementTokenVersion(userId);
   }
 }

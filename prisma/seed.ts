@@ -3,57 +3,60 @@ import { prisma } from "@/app/lib/prisma";
 import bcrypt from "bcryptjs";
 
 async function main() {
-  console.log("Sedang melakukan koneksi ke MariaDB...");
+  console.log("🔄 Menghubungkan ke database...");
+
+  await prisma.$connect();
 
   try {
-    // 1. Pastikan koneksi terjalin
-    await prisma.$connect();
+    console.log("🔄 Menyiapkan akun default...");
 
-    console.log("Sedang membuat data admin...");
-    const adminPassword = await bcrypt.hash("admin123", 10);
-    const userPassword = await bcrypt.hash("user123", 10);
+    // Gunakan cost 12 (lebih aman)
+    const adminPasswordHash = await bcrypt.hash("admin123", 12);
+    const userPasswordHash = await bcrypt.hash("user123", 12);
 
-    // 2. Gunakan upsert
-    const admin = await prisma.user.upsert({
-      where: { email: "admin@hapesindo.com" },
-      update: {},
-      create: {
-        email: "admin@hapesindo.com",
-        name: "Super Admin Hapesindo",
-        password: adminPassword,
-        role: "ADMIN",
-      },
-    });
-    // 3. Buat / Update User Biasa (Untuk tes: seharusnya ditendang oleh middleware jika akses /admin)
-    const regularUser = await prisma.user.upsert({
-      where: { email: "user@hapesindo.com" },
-      update: { password: userPassword },
-      create: {
-        email: "user@hapesindo.com",
-        name: "Customer Biasa",
-        password: userPassword,
-        role: "USER",
-      },
-    });
+    await prisma.$transaction([
+      prisma.user.upsert({
+        where: { email: "admin@hapesindo.com" },
+        update: {
+          password: adminPasswordHash,
+          role: "ADMIN",
+          tokenVersion: 0,
+          deletedAt: null,
+        },
+        create: {
+          email: "admin@hapesindo.com",
+          name: "Super Admin Hapesindo",
+          password: adminPasswordHash,
+          role: "ADMIN",
+        },
+      }),
 
-    console.log("✅ Seed Berhasil!");
-    console.log("-----------------------------------------");
-    console.log("Akses Admin:");
-    console.log(`Email: ${admin.email} | Pass: admin123`);
-    console.log("-----------------------------------------");
-    console.log("Akses User Biasa (Tes Middleware):");
-    console.log(`Email: ${regularUser.email} | Pass: user123`);
-    console.log("-----------------------------------------");
-  } catch (err) {
-    throw err;
+      prisma.user.upsert({
+        where: { email: "user@hapesindo.com" },
+        update: {
+          password: userPasswordHash,
+          role: "USER",
+          tokenVersion: 0,
+          deletedAt: null,
+        },
+        create: {
+          email: "user@hapesindo.com",
+          name: "Customer Biasa",
+          password: userPasswordHash,
+          role: "USER",
+        },
+      }),
+    ]);
+
+    console.log("✅ Seed berhasil.");
+    console.log("Admin  : admin@hapesindo.com / admin123");
+    console.log("User   : user@hapesindo.com / user123");
+  } catch (error) {
+    console.error("❌ Seed gagal:", error);
+    process.exit(1);
+  } finally {
+    await prisma.$disconnect();
   }
 }
 
-main()
-  .catch((e) => {
-    console.error("❌ Seed Error detail:", e);
-    process.exit(1);
-  })
-  .finally(async () => {
-    await prisma.$disconnect();
-  });
+main();

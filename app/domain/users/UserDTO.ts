@@ -1,28 +1,10 @@
-/**
- * Data user dari database untuk proses AUTH
- * ⚠️ Jangan pernah dikirim ke client
- */
-export interface UserAuthDTO {
-  id: string;
-  name: string;
-  email: string;
-  password: string;
-  role: UserRole;
-  tokenVersion: number;
-}
+export type UserRole = "ADMIN" | "USER";
 
-/**
- * Data login dari client
- */
 export interface LoginRequestDTO {
   email: string;
-  password: string; // ganti pass → konsisten
+  password: string;
 }
 
-/**
- * Data yang dikembalikan ke client
- * ⚠️ TANPA password
- */
 export interface LoginResponseDTO {
   user: {
     id: string;
@@ -31,6 +13,12 @@ export interface LoginResponseDTO {
     role: UserRole;
   };
   token: string;
+}
+
+export interface JwtPayload {
+  sub: string;
+  role: UserRole;
+  tokenVersion: number;
 }
 
 export interface ActionResponse {

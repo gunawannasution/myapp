@@ -53,23 +53,23 @@ model Distributor{
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+enum Role {
+  ADMIN
+  USER
+}
+
 model User {
   id           String   @id @default(uuid())
   name         String
   email        String   @unique
   password     String
-  role         Role     @relation(fields: [roleId], references: [id])
-  roleId       String
+  role         Role     @default(USER)
 
   tokenVersion Int      @default(0)
 
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
   deletedAt    DateTime?
-}
 
-model Role {
-  id        String   @id @default(uuid())
-  name      String   @unique
-  users     User[]
+  @@index([email])
 }
