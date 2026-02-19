@@ -1,6 +1,13 @@
+import { jwtVerify } from "jose";
 import { NextRequest, NextResponse } from "next/server";
-import { verifyToken } from "./app/lib/jwt";
-import { prisma } from "./app/lib/prisma";
+
+const JWT_SECRET = process.env.JWT_SECRET;
+
+if (!JWT_SECRET) {
+  throw new Error("JWT_SECRET tidak terkonfigurasi");
+}
+
+const secret = new TextEncoder().encode(JWT_SECRET);
 
 export async function middleware(req: NextRequest) {
   const token = req.cookies.get("admin_token")?.value;
@@ -10,15 +17,7 @@ export async function middleware(req: NextRequest) {
   }
 
   try {
-    const payload = verifyToken(token);
-
-    const user = await prisma.user.findUnique({
-      where: { id: payload.sub },
-    });
-
-    if (!user || user.deletedAt || user.tokenVersion !== payload.tokenVersion) {
-      throw new Error();
-    }
+    await jwtVerify(token, secret);
 
     return NextResponse.next();
   } catch {

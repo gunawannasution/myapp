@@ -8,6 +8,10 @@ const nextConfig = {
         port: "3000", // Sesuaikan dengan port aplikasi kamu
         pathname: "/uploads/**",
       },
+      {
+        protocol: "https",
+        hostname: "ui-avatars.com",
+      },
     ],
   },
 };

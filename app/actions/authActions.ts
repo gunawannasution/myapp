@@ -1,61 +1,67 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { ActionResponse } from "../domain/users/UserDTO";
-import { checkRateLimit } from "../lib/rateLimiter";
+import { ActionReponse, LoginRequestDTO } from "../domain/users/UserDTO";
 import { UserRepository } from "../repositories/UserRepository";
 import { AuthService } from "../services/AuthService";
 
-const authService = new AuthService(new UserRepository());
+const userRepository = new UserRepository();
+const authService = new AuthService(userRepository);
 
-function sanitize(value: FormDataEntryValue | null): string | null {
+function sanitizeString(value: FormDataEntryValue | null): string | null {
   if (!value) return null;
-  const trimmed = value.toString().trim();
-  return trimmed.length > 0 ? trimmed : null;
+  const str = value.toString().trim();
+  return str.length > 0 ? str : null;
+}
+
+function buildError(message: string): ActionReponse {
+  return {
+    success: false,
+    message,
+  };
 }
 
 export async function loginAction(
-  _: ActionResponse | null,
+  _: ActionReponse | null,
   formData: FormData,
-): Promise<ActionResponse> {
-  const email = sanitize(formData.get("email"));
-  const password = sanitize(formData.get("password"));
-
-  if (!email || !password) {
-    return {
-      success: false,
-      message: "Email dan password wajib diisi",
-    };
-  }
-
+): Promise<ActionReponse> {
   try {
-    checkRateLimit(email);
+    const email = sanitizeString(formData.get("email"));
+    const password = sanitizeString(formData.get("password"));
 
-    const result = await authService.login({ email, password }, ["ADMIN"]);
+    if (!email || !password) {
+      return buildError("Email dan password wajib diisi");
+    }
 
-    const cookieStore = cookies();
+    const payload: LoginRequestDTO = {
+      email,
+      password,
+    };
+
+    const result = await authService.login(payload);
+
+    // WAJIB await untuk kompatibilitas versi
+    const cookieStore = await cookies();
 
     cookieStore.set("admin_token", result.token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      sameSite: "lax",
       path: "/",
       maxAge: 60 * 60 * 24,
     });
-  } catch (error) {
-    return {
-      success: false,
-      message: "Email atau password salah",
-    };
+  } catch (error: unknown) {
+    console.error("[loginAction]", error);
+    return buildError("Email atau password salah");
   }
-
-  // ⬇ redirect di luar try/catch
+  revalidatePath("/admin/dashboard");
   redirect("/admin/dashboard");
 }
 
 export async function logoutAction(): Promise<void> {
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
   cookieStore.delete("admin_token");
-  return redirect("/login");
+  redirect("/login");
 }

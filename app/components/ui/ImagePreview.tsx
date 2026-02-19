@@ -1,12 +1,12 @@
-// app/products/_components/ui/ImagePreview.tsx
 "use client";
 
 import Image from "next/image";
+import type { ProductImagePreview } from "../types";
 
 interface ImagePreviewProps {
-  images: any[]; // Gambar dari database
-  newFiles: File[]; // File mentah dari input file
-  deletedIds: string[]; // State ID yang akan dihapus
+  images: ProductImagePreview[];
+  newFiles: File[];
+  deletedIds: string[];
   onToggleDelete: (id: string) => void;
   onRemoveNewFile: (index: number) => void;
 }
@@ -20,7 +20,7 @@ export default function ImagePreview({
 }: ImagePreviewProps) {
   return (
     <div className="grid grid-cols-3 gap-3">
-      {/* 1. PREVIEW GAMBAR LAMA (DARI DATABASE) */}
+      {/* Existing Images */}
       {images.map((img) => (
         <div
           key={img.id}
@@ -38,7 +38,6 @@ export default function ImagePreview({
             }`}
           />
 
-          {/* Hidden input agar ID yang dihapus terkirim ke Server Action */}
           {deletedIds.includes(img.id) && (
             <input type="hidden" name="imagesToDelete" value={img.id} />
           )}
@@ -61,10 +60,10 @@ export default function ImagePreview({
         </div>
       ))}
 
-      {/* 2. PREVIEW GAMBAR BARU (AKAN DIUPLOAD) */}
+      {/* New Files */}
       {newFiles.map((file, index) => {
-        // Membuat URL sementara untuk preview
         const objectUrl = URL.createObjectURL(file);
+
         return (
           <div
             key={index}
@@ -76,8 +75,9 @@ export default function ImagePreview({
               fill
               sizes="100px"
               className="object-cover"
-              onLoadingComplete={() => URL.revokeObjectURL(objectUrl)} // Bersihkan memori
+              onLoadingComplete={() => URL.revokeObjectURL(objectUrl)}
             />
+
             <button
               type="button"
               onClick={() => onRemoveNewFile(index)}
@@ -85,6 +85,7 @@ export default function ImagePreview({
             >
               ✕
             </button>
+
             <div className="absolute bottom-0 left-0 right-0 bg-blue-500/80 py-0.5 text-[8px] text-center text-white font-bold">
               NEW
             </div>

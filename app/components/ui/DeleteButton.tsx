@@ -1,7 +1,7 @@
-"use client"; // Kunci utama untuk interaktivitas
+"use client";
 
 interface DeleteButtonProps {
-  action: (id: any) => void;
+  action: (formData: FormData) => void | Promise<void>;
 }
 
 export default function DeleteButton({ action }: DeleteButtonProps) {
